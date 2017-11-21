@@ -5,9 +5,11 @@ from itertools import count
 #Python mock social media website. We start by creating a user class
 class User:
     """This Class defines a user in our domain."""
-    def __init__(self, first, last):
-        self.first     = first
-        self.last      = last
+    def __init__(self, username, password):
+        self.username  = username
+        self.password  = password
+        # self.first     = first
+        # self.last      = last
         # self.birthday  = birthday
         self.friends   = []
 
@@ -22,22 +24,53 @@ with open(PIK, "rb") as f:
     objects = pickle.load(f)
 
 users, userbase = objects[0], objects[1]
+#users,userbase = 0, []
+
 #TODO 2 to login.
 
-start = int(input("Welcome to LeaFacebook. Press 1 to sign up."))
+start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to login "))
+def getId(n):
+    for i in userbase:
+        if i[1] == n:
+            return i[3]
+    print("This is not a valid username")
+
+def lookup(id):
+    """Look up a persons username and password"""
+    for i in userbase:
+        if int(i[3]) == int(id):
+            password = i[2]
+            return password
+    print("This is not a valid username")
+
+def login():
+    username = raw_input("Please input your username: ")
+    password = raw_input("Please input your password: ")
+    id = getId(username)
+    passwd = lookup(id)
+    if passwd == password:
+        print("hooray")
+    else:
+        print("Please try again")
+        login()
 
 def userGenerator():
     global users
-    firstname = input("Please input your first name: ")
-    lastname = input("Please input your last name: ")
-    user = User(firstname, lastname)
+    username = raw_input("Please input a username: ")
+    password = raw_input("Please input a password: ")
+    user = User(username, password)
     users += 1
-    userbase.append((user, user.first, users))
+    userbase.append((user, username, password, users))
+    return userbase
 
+def main(s):
+    print(userbase)
+    if s == 1:
+        userGenerator()
+    elif s == 2:
+        login()
 
-userGenerator()
-print(userbase)
-print(users)
+main(start)
 
 saveObject = (users, userbase)
 with open(PIK,"wb") as f:

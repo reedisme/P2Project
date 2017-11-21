@@ -1,20 +1,62 @@
 import pickle
-from itertools import count
-#Pickle allows us to save our users in a separate file for easy access.
+
+class Graph:
+    def __init__(self):
+        self.matrix = {}
+
+    def add_user(self, key):
+        self.matrix[key] = []
+
+    def add_friendship(self, v1, v2):
+        if v1 in self.matrix and v2 in self.matrix:
+            self.matrix[v1].append(v2)
+            self.matrix[v1].sort()
+        else:
+            print("ERROR: One or both vertices do not yet exist")
+        print(self.matrix)
+
+    def is_edge(self, v1, v2):
+        if v2 in self.matrix[v1]:
+            return True
+        else:
+            return False
+
+friendsdb = Graph()
 
 #Python mock social media website. We start by creating a user class
 class User:
     """This Class defines a user in our domain."""
-    def __init__(self, username, password):
+
+    def __init__(self, username, password, userid):
         self.username  = username
         self.password  = password
+        self.userid    = userid
         # self.first     = first
         # self.last      = last
         # self.birthday  = birthday
         self.friends   = []
+        friendsdb.add_user(self.userid)
 
     def add_friend(self, friend):
-        self.friends.append(friend)
+        if self.userid > friend.userid:
+            friendsdb.add_friendship(self.userid, friend.userid)
+        elif friend.userid > self.userid:
+            friendsdb.add_friendship(friend.userid, self.userid)
+
+    def are_friends(self, friend):
+        if self.userid > friend.userid:
+            return friendsdb.is_edge(self.userid, friend.userid)
+        elif friend.userid > self.userid:
+            return friendsdb.is_edge(friend.userid, self.userid)
+
+    def generate_flist(self):
+        flist = []
+        for i in friendsdb.matrix[self]:
+            flist.append(i)
+        for i in friendsdb.matrix:
+            if self.userid in friendsdb.matrix[i]:
+                flist.append(i)
+        return(flist)
 
 #Storing our userbase and users to the pickle file 'data.pk.'
 PIK = 'data.pk'
@@ -23,10 +65,8 @@ PIK = 'data.pk'
 with open(PIK, "rb") as f:
     objects = pickle.load(f)
 
-users, userbase = objects[0], objects[1]
-#users,userbase = 0, []
-
-#TODO 2 to login.
+userid, userbase = objects[0], objects[1]
+#userid, userbase = 0, []
 
 start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to login "))
 def getId(n):
@@ -55,23 +95,26 @@ def login():
         login()
 
 def userGenerator():
-    global users
+    global userid
     username = raw_input("Please input a username: ")
     password = raw_input("Please input a password: ")
-    user = User(username, password)
-    users += 1
-    userbase.append((user, username, password, users))
+    userid += 1
+    user = User(username, password, userid)
+    userbase.append((user, username, password, userid))
     return userbase
 
 def main(s):
-    print(userbase)
     if s == 1:
         userGenerator()
     elif s == 2:
         login()
-
+print(userbase)
 main(start)
 
-saveObject = (users, userbase)
+saveObject = (userid, userbase)
 with open(PIK,"wb") as f:
     pickle.dump(saveObject, f)
+
+print(userbase[0][0].userid)
+userbase[0][0].add_friend(userbase[1][0])
+print(userbase[0][0].are_friends[userbase[1][0]])

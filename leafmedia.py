@@ -42,7 +42,7 @@ start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to lo
 def getObject(n):
     """Get id from username"""
     for i in userbase:
-        if i[1] == n:
+        if i[1] == str(n):
             return i[0]
     print("This is not a valid username")
 
@@ -65,8 +65,7 @@ def isuser(u):
 def login():
     username = input("Please input your username: ")
     password = input("Please input your password: ")
-    id = getId(username)
-    passwd = lookup(id)
+    uname, passwd = lookup(getObject(username))
     if passwd == password:
         for i in userbase:
             if username == i[1]:
@@ -90,30 +89,36 @@ def userGenerator():
 
 
 def home(user):
-    print("Recent posts from your friends!")  # This section prints out the five most recent posts from your friends
+    print("Recent posts from your friends!")    # This section prints out the five most recent posts from your friends
     tempposts = []
     allfriends = []
-    for i in user.friends:
-        allfriends.append(i.posthist[-1])
-        allfriends.sort(reverse=True)
+    for i in getObject(user).friends:
+        tempfriend = getObject(i)
+        allfriends.append(tempfriend.posthist[-1])
+        allfriends.sort()
     for i in range(len(allfriends)):
-        tempposts.append(allfriends[i])
+        tempposts.append(allfriends.pop())
     for i in tempposts:
         print(" ")
         print("Posted on " + time.gmtime(tempposts[0]) + ":")
         print(i[1])
 
-    choice = input("Press 1 to make a new post, 2 to view a friend's profile, or 3 to log out.")
+    choice = int(input("Press 1 to make a new post, 2 to view a friend's profile, 3 to add a friend, or 4 to log out."))
     if choice == 1:
         post = str(input("Enter the text of your new post here: "))
-        user.posthist.append([int(time.time()), post])  # Clunky implementation! Time first so sorting is easy
+        getObject(user).posthist.append([int(time.time()), post])  # Clunky implementation! Time first so sorting is easy
         home(user)
     elif choice == 2:
-        friend = eval(input("Whose profile would you like to see?"))  # Currently assuming this is the object ref.
-        print("You are viewing " + friend.username + "'s profile:")
-        print("User ID: " + friend.userid)
+        friend = eval(input("Whose profile would you like to see?"))
+        print("You are viewing " + friend + "'s profile:")
         print("Friends:")
-        friend.show_friends()  # Currently we don't have any more profile info, but we can add it here if/when we do
+        getObject(friend).show_friends()   # Currently we don't have any more profile info, but we can add it here if/when we do
+    elif choice == 3:
+        counter = 1
+        for i in userbase:
+            print(counter, "   ", i[1])
+            counter += 1
+        user.add_friend(input("Press the number corresponding to the new friend's username: "))
 
 
 def main(s):
@@ -121,7 +126,8 @@ def main(s):
         userGenerator()
     elif s == 2:
         u = login()
-        home(u)
+        usr, pswd = lookup(u)
+        home(usr)
 
 
 print(userbase)

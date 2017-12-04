@@ -13,7 +13,7 @@ class User:
         # self.first     = first
         # self.last      = last
         # self.birthday  = birthday
-        self.friends = []
+        self.friends = []   # objects
         self.posthist = []
 
     def add_friend(self, friend):
@@ -40,9 +40,10 @@ start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to lo
 
 
 def getObject(n):
-    """Get id from username"""
+    """Get object from username"""
     for i in userbase:
-        if i[1] == str(n):
+        print(i[1], n)
+        if str(i[1]) == str(n):
             return i[0]
     print("This is not a valid username")
 
@@ -63,8 +64,8 @@ def isuser(u):
 
 
 def login():
-    username = input("Please input your username: ")
-    password = input("Please input your password: ")
+    username = str(input("Please input your username: "))
+    password = str(input("Please input your password: "))
     uname, passwd = lookup(getObject(username))
     if passwd == password:
         for i in userbase:
@@ -93,7 +94,8 @@ def home(user):
     tempposts = []
     allfriends = []
     for i in getObject(user).friends:
-        tempfriend = getObject(i)
+        tempfriend = i
+        print(tempfriend)
         allfriends.append(tempfriend.posthist[-1])
         allfriends.sort()
     for i in range(len(allfriends)):
@@ -114,11 +116,13 @@ def home(user):
         print("Friends:")
         getObject(friend).show_friends()   # Currently we don't have any more profile info, but we can add it here if/when we do
     elif choice == 3:
-        counter = 1
-        for i in userbase:
-            print(counter, "   ", i[1])
-            counter += 1
-        user.add_friend(input("Press the number corresponding to the new friend's username: "))
+        friend = eval(input("Who would you like to add as a friend?"))
+        user.add_friend(getObject(friend))
+        # counter = 1
+        # for i in userbase:
+        #     print(counter, "   ", i[1])
+        #     counter += 1
+        # user.add_friend(input("Press the number corresponding to the new friend's username: "))
 
 
 def main(s):

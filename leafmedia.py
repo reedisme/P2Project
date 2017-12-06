@@ -36,7 +36,7 @@ class User:
         self.friends = []
 
     def add_post(self, post):
-        self.posts.append(post)
+        self.posts.append({post:[]})
 
 # Storing our userbase and users to the pickle file 'data.pk.'
 PIK = 'data.pk'
@@ -47,7 +47,6 @@ with open(PIK, "rb") as f:
 userid, userbase = objects[0], objects[1]
 #userid, userbase = 0, []
 
-start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to login "))
 
 
 def getObject(n):
@@ -98,9 +97,20 @@ def userGenerator():
     else:
         print("That username is taken. Please input a different username.")
         userGenerator()
+    return user
 
+def clear():
+    for i in range(100):
+        print(" ")
 
-
+def commentOn(user, index):
+    if index is not int:
+        print("Not int")
+    elif 0 < index and index <= len(user.posts):
+        val = user.posts[index-1]
+        print(val)
+        if index - 1:
+            print('daddy')
 def home(user):
     """Home function using user object."""
     print(userbase)
@@ -121,13 +131,12 @@ def home(user):
             friendToAdd = str(input("Input another friend, or input 0 to exit: "))
         home(user)
     else:
-        for i in range(100):
-            print(" ")
+        clear()
         print("Recent posts from your friends! \n")
         for i in user.friends:
             username, probablynotapassword = lookup(i)
             print(username, "says:", i.posts[-1], "\n")
-        action = str(input("Press 1 to add a new friend, 2 to post, and 3 to view a friend's profile.\n"))
+        action = str(input("Press 1 to add a new friend, 2 to post, and 3 to view a friend's profile, and 4 to logout.\n"))
         if action == str(1):
             counter = 1
             for i in userbase:
@@ -145,13 +154,35 @@ def home(user):
         if action == str(2):
             mypost = input("What's on your mind?")
             user.posts.append(mypost)
+        if action == str(3):
+            print(user)
+            for i in user.friends:
+                friend, nothing = lookup(i)
+                print(friend)
+            friendToView = input("Please select a friends profile that you would like to view: ")
+            if isuser(friendToView) == True:
+                print(friendToView + "'s profile:")
+                for i in getObject(friendToView).posts:
+                    print(i)
+                post = int(input("Select which post you would like to comment on, or press 0 to exit!"))
+                if post != 0:
+                    commentOn(getObject(friendToView), post)
+            else:
+                print("Bad user")
 
+        if action == str(4):
+            clear()
+            start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to login"))
+            main(start)
     home(user)
 
+clear()
+start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to login"))
 
 def main(s):
     if s == 1:
-        userGenerator()
+        u = userGenerator()
+        home(u)
     elif s == 2:
         u = login()
         home(u)

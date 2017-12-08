@@ -1,5 +1,6 @@
 import pickle
 import time
+import sys
 
 
 # Python mock social media website. We start by creating a user class
@@ -35,7 +36,7 @@ class User:
         self.friends = []
 
     def add_post(self, post):
-        self.posts.append({post:[]})
+        self.posts.append([post,[]])
 
 # Storing our userbase and users to the pickle file 'data.pk.'
 PIK = 'data.pk'
@@ -43,8 +44,10 @@ PIK = 'data.pk'
 
 userbase = pickle.load( open( PIK, "rb" ))
 #userbase = []
-#userbase.append((User('Dave','123'), 'Dave', '123'))
 
+def quitprogram():
+    pickle.dump(userbase, open(PIK, "wb"))
+    sys.exit() 
 
 def getObject(n):
     """Get id from username"""
@@ -86,13 +89,13 @@ def userGenerator():
     username = input("Please input a username: ")
     if isuser(username) == False:
         password = input("Please input a password: ")
-        user = User(username, password)
-        user.add_post("I just joined LeafMedia, and I could not be happier!")
-        userbase.append((user, username, password))
+        u = User(username, password)
+        u.add_post("I just joined LeafMedia, and I could not be happier!")
+        userbase.append((u, username, password))
     else:
         print("That username is taken. Please input a different username.")
         userGenerator()
-    return user
+    return u
 
 def clear():
     for i in range(100):
@@ -104,9 +107,15 @@ def commentOn(user, index):
     elif 0 < index and index <= len(user.posts):
         val = user.posts[index-1]
         print(val)
+        comment = str(input("Add your comment here: "))
+        val[1].append(comment)
+        print(val)
 
 
 def home(user):
+    if len(userbase)==1:
+        print("There are no other users. Please sign up another user.")
+        userGenerator()
     """Home function using user object."""
     print(userbase)
     print("Your friends:", user.friends)  # This section prints out the five most recent posts from your friends'
@@ -124,14 +133,17 @@ def home(user):
             else:
                 print("This user does not exist.")
             friendToAdd = str(input("Input another friend, or input 0 to exit: "))
-        pickle.dump(userbase, open(PIK, "wb"))
         home(user)
     else:
         clear()
         print("Recent posts from your friends! \n")
         for i in user.friends:
             username, probablynotapassword = lookup(i)
-            print(username, "says:", i.posts[-1], "\n")
+            print(username, "says:", i.posts[-1][0], "\n")
+            if len(i.posts[-1][1]) > 0: 
+                print("    Comments:")
+                for i in i.posts[-1][1]:
+                    print(i)
         action = str(input("Press 1 to add a new friend, 2 to post, and 3 to view a friend's profile, and 4 to logout.\n"))
         if action == str(1):
             counter = 1
@@ -158,10 +170,11 @@ def home(user):
             friendToView = input("Please select a friends profile that you would like to view: ")
             if isuser(friendToView) == True:
                 print(friendToView + "'s profile:")
+                counter = 0
                 for i in getObject(friendToView).posts:
-                    print(i)
+                    counter += 1
+                    print(counter, i[0])
                 post = int(input("Select which post you would like to comment on, or press 0 to exit!"))
-                #getObject(friendToView).posts[post-1]
                 if post != 0:
                     commentOn(getObject(friendToView), post)
             else:
@@ -169,12 +182,12 @@ def home(user):
 
         if action == str(4):
             clear()
-            start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to login"))
+            start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to login.\n Press 3 to quit: "))
             main(start)
     home(user)
 
 clear()
-start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to login"))
+start = int(input("Welcome to LeaFacebook.\n Press 1 to sign up.\n Press 2 to login.\n Press 3 to quit: "))
 
 def main(s):
     if s == 1:
@@ -183,8 +196,9 @@ def main(s):
     elif s == 2:
         u = login()
         home(u)
+    elif s == 3:
+        quitprogram()
 
 
 print(userbase)
 main(start)
-

@@ -6,10 +6,9 @@ import time
 class User:
     """This Class defines a user in our domain."""
 
-    def __init__(self, username, password, userid):
+    def __init__(self, username, password):
         self.username = username
         self.password = password
-        self.userid = userid
         # self.first     = first
         # self.last      = last
         # self.birthday  = birthday
@@ -41,12 +40,10 @@ class User:
 # Storing our userbase and users to the pickle file 'data.pk.'
 PIK = 'data.pk'
 
-with open(PIK, "rb") as f:
-    objects = pickle.load(f)
 
-userid, userbase = objects[0], objects[1]
-#userid, userbase = 0, []
-
+userbase = pickle.load( open( PIK, "rb" ))
+#userbase = []
+#userbase.append((User('Dave','123'), 'Dave', '123'))
 
 
 def getObject(n):
@@ -86,14 +83,12 @@ def login():
 
 
 def userGenerator():
-    global userid
     username = input("Please input a username: ")
     if isuser(username) == False:
         password = input("Please input a password: ")
-        userid += 1
-        user = User(username, password, userid)
+        user = User(username, password)
         user.add_post("I just joined LeafMedia, and I could not be happier!")
-        userbase.append((user, username, password, userid))
+        userbase.append((user, username, password))
     else:
         print("That username is taken. Please input a different username.")
         userGenerator()
@@ -104,13 +99,13 @@ def clear():
         print(" ")
 
 def commentOn(user, index):
-    if index is not int:
+    if type(index) is not int:
         print("Not int")
     elif 0 < index and index <= len(user.posts):
         val = user.posts[index-1]
         print(val)
-        if index - 1:
-            print('daddy')
+
+
 def home(user):
     """Home function using user object."""
     print(userbase)
@@ -129,6 +124,7 @@ def home(user):
             else:
                 print("This user does not exist.")
             friendToAdd = str(input("Input another friend, or input 0 to exit: "))
+        pickle.dump(userbase, open(PIK, "wb"))
         home(user)
     else:
         clear()
@@ -165,6 +161,7 @@ def home(user):
                 for i in getObject(friendToView).posts:
                     print(i)
                 post = int(input("Select which post you would like to comment on, or press 0 to exit!"))
+                #getObject(friendToView).posts[post-1]
                 if post != 0:
                     commentOn(getObject(friendToView), post)
             else:
@@ -191,12 +188,3 @@ def main(s):
 print(userbase)
 main(start)
 
-saveObject = (userid, userbase)
-with open(PIK, "wb") as f:
-    pickle.dump(saveObject, f)
-
-    # print(userbase[0][0].username)
-    # userbase[0][0].add_friend(userbase[1][0])
-    # userbase[0][0].add_friend(userbase[2][0])
-    # userbase[0][0].add_friend(userbase[3][0])
-    # userbase[0][0].show_friends()
